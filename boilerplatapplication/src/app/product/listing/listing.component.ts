@@ -3,8 +3,8 @@ import { CommonHttpServiceService } from './../../shared/service/common-http-ser
 import { ProductCategory } from './../model/product-category.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
-import { pipe, EMPTY, Observable } from 'rxjs';
-import { finalize, catchError } from 'rxjs/operators';
+import { pipe, EMPTY, Observable, forkJoin, combineLatest } from 'rxjs';
+import { finalize, catchError, take, map } from 'rxjs/operators';
 import { ProductService } from '../service/product.service';
 
 @Component({
@@ -16,7 +16,7 @@ export class ListingComponent implements OnInit {
 
   displayedColumns: string[] = ['name', 'category', 'price'];
   spinner: boolean;
-  products$: Observable<Array<Product>>;
+  productCategories$: Observable<Array<Product>>;
   categories$: Observable<Array<ProductCategory>>;
   searchFormGroup: FormGroup;
 
@@ -28,7 +28,9 @@ export class ListingComponent implements OnInit {
   ngOnInit() {
     this.setSpinnerValue(true);
     this.createSearchForm();
-    this.searchProducts();
+    // this.searchProductsWithForJoin();
+    // this.searchProductsWithCombineLatest();
+    this.searchProductsWithWithLatestFrom();
   }
 
   createSearchForm() {
@@ -39,14 +41,38 @@ export class ListingComponent implements OnInit {
     });
   }
 
-  searchProducts() {
+
+  searchProductsWithForJoin() {
     this.setSpinnerValue(false);
-    this.products$ = this.productService.getProduct()
+    this.productCategories$ = this.productService.getproductCategoriesForkJoin()
       .pipe(finalize(() => {
         this.setSpinnerValue(false);
       }), catchError((error) => {
         this.setSpinnerValue(false);
-        return EMPTY;
+        throw error;
+      }));
+  }
+
+  searchProductsWithCombineLatest() {
+    this.setSpinnerValue(false);
+    this.productCategories$ = this.productService.getProductCategoriesCombinLatest()
+      .pipe(finalize(() => {
+        this.setSpinnerValue(false);
+      }), catchError((error) => {
+        this.setSpinnerValue(false);
+        throw error;
+      }));
+  }
+
+
+  searchProductsWithWithLatestFrom() {
+    this.setSpinnerValue(false);
+    this.productCategories$ = this.productService.getProductCategoriesWithLatestFrom()
+      .pipe(finalize(() => {
+        this.setSpinnerValue(false);
+      }), catchError((error) => {
+        this.setSpinnerValue(false);
+        throw error;
       }));
   }
 

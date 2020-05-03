@@ -44,7 +44,7 @@ export class AddComponent implements OnInit {
       name: savedValues.name,
       description: savedValues.description,
       price: savedValues.price,
-      productCategoryId: savedValues.categoryId
+      categoryId: savedValues.categoryId
     };
 
     console.log(product);
